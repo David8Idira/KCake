@@ -1,0 +1,76 @@
+# KCake Docker Compose for Cluster Deployment
+
+version: '3.8'
+
+services:
+  # Master Node
+  kcake-master:
+    build: .
+    container_name: kcake-master
+    ports:
+      - "8000:8000"
+    environment:
+      - ROLE=master
+      - MODEL_NAME=meta-llama/Llama-3.1-8B
+      - CLUSTER_KEY=${CLUSTER_KEY:-secret123}
+      - HOST=0.0.0.0
+      - PORT=8000
+    volumes:
+      - model-cache:/root/.cache/huggingface
+      - ./weights:/app/weights
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Worker Node 1 (GPU)
+  kcake-worker-gpu:
+    build: .
+    container_name: kcake-worker-gpu
+    environment:
+      - ROLE=worker
+      - CLUSTER_KEY=${CLUSTER_KEY:-secret123}
+      - WORKER_NAME=gpu-worker-1
+      - MASTER_HOST=kcake-master
+      - MASTER_PORT=8000
+    volumes:
+      - weight-cache:/root/.cache/kcake
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      - kcake-master
+    restart: unless-stopped
+
+  # Worker Node 2 (CPU only)
+  kcake-worker-cpu:
+    build: .
+    container_name: kcake-worker-cpu
+    environment:
+      - ROLE=worker
+      - CLUSTER_KEY=${CLUSTER_KEY:-secret123}
+      - WORKER_NAME=cpu-worker-1
+      - MASTER_HOST=kcake-master
+      - MASTER_PORT=8000
+    volumes:
+      - weight-cache:/root/.cache/kcake
+    depends_on:
+      - kcake-master
+    restart: unless-stopped
+
+volumes:
+  model-cache:
+  weight-cache:
