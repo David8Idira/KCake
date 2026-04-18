@@ -313,20 +313,18 @@ class InferenceEngine:
             self.kv_cache.clear()
             
             # 清理CUDA缓存
-            if torch.cuda.is_available():
+            if torch is not None and hasattr(torch, 'cuda') and torch.cuda.is_available():
                 torch.cuda.empty_cache()
             
             logger.info("模型已卸载")
     
     def get_model_info(self) -> Dict[str, Any]:
         """获取模型信息"""
-        if not self.is_loaded:
-            return {"status": "not_loaded"}
-        
         info = {
+            "status": "loaded" if self.is_loaded else "not_loaded",
+            "is_loaded": self.is_loaded,
             "model_name": self.model_name,
             "device": self.device,
-            "is_loaded": self.is_loaded,
             "model_type": self.model.__class__.__name__ if self.model else None,
             "num_parameters": self.model.num_parameters() if self.model else 0,
             "kv_cache_size": len(self.kv_cache),
