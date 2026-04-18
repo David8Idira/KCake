@@ -8,8 +8,20 @@ import asyncio
 import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, AsyncGenerator
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, PreTrainedModel, PreTrainedTokenizer
+
+# 可选依赖 - 测试时不导入
+try:
+    import torch
+except ImportError:
+    torch = None
+
+try:
+    from transformers import AutoModelForCausalLM, AutoTokenizer, PreTrainedModel, PreTrainedTokenizer
+except ImportError:
+    AutoModelForCausalLM = None
+    AutoTokenizer = None
+    PreTrainedModel = None
+    PreTrainedTokenizer = None
 
 logger = logging.getLogger(__name__)
 

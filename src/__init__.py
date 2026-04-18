@@ -10,7 +10,12 @@ __author__ = "KCake Team"
 from .core import InferenceEngine
 from .heterogeneous import HeteroScheduler
 from .cluster import ClusterManager
-from .api import APIServer
+
+# 可选API依赖
+try:
+    from .api import APIServer
+except ImportError:
+    APIServer = None
 
 __all__ = [
     "InferenceEngine",

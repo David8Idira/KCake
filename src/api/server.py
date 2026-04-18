@@ -406,7 +406,7 @@ class KcakeAPIServer:
             logger.error(f"流式响应生成失败: {e}")
             yield f"data: {self._json_dumps({'error': str(e)})}\n\n"
     
-    async def def _ollama_stream_response(self, request: Any):
+    async def _ollama_stream_response(self, request: Any):
         """Ollama流式响应生成器"""
         try:
             async for text in self.inference_engine.generate_stream(request):
