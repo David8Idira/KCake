@@ -5,7 +5,7 @@ OpenAI API适配器
 """
 
 import logging
-from typing import Dict, List, Optional, Any, AsyncGenerator
+from typing import Dict, List, Optional, Any, AsyncGenerator, Union
 import time
 
 logger = logging.getLogger(__name__)
